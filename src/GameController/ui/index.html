@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>upmy.stream Game Controller</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="bar">
+    <div class="brand">
+      <svg viewBox="232 279 560 560" aria-hidden="true"><path d="M302 612 L512 402 L722 612" fill="none" stroke="currentColor" stroke-width="118" stroke-linecap="round" stroke-linejoin="round"/><circle cx="512" cy="742" r="58" fill="currentColor"/></svg>
+      <span>Game Controller</span>
+    </div>
+    <span id="status" class="pill">Stopped</span>
+    <div class="spacer"></div>
+    <button id="power" class="power" title="Turn all actions on or off">
+      <span class="dot"></span><span id="power-label">On</span><kbd id="power-hotkey"></kbd>
+    </button>
+    <button id="run" class="ghost">Start</button>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Setup</h2>
+      <div class="row">
+        <label for="key">upmy.stream API key</label>
+        <div class="field" id="key-field">
+          <input id="key" type="password" placeholder="Paste your API key from upmy.stream" autocomplete="off" spellcheck="false">
+          <button id="key-save">Connect</button>
+        </div>
+        <div class="field hidden" id="key-set">
+          <code id="key-hint"></code>
+          <button id="key-change" class="ghost">Change</button>
+        </div>
+        <p class="note" id="key-note"></p>
+      </div>
+      <div class="row">
+        <label for="game">Game</label>
+        <div class="field">
+          <select id="game"></select>
+          <button id="games-refresh" class="ghost icon" title="Refresh the game list">↻</button>
+        </div>
+        <p class="note">Keys and mouse actions are only sent while this game is the active window.</p>
+      </div>
+      <div class="row inline">
+        <div>
+          <span class="label">Chat triggers</span>
+          <p class="note">Lets viewers trigger actions by typing a word in chat, for example <code>w</code>.</p>
+        </div>
+        <label class="switch"><input id="chat" type="checkbox" aria-label="Chat triggers"><span></span></label>
+      </div>
+      <div class="row inline">
+        <div>
+          <span class="label">On/off hotkey</span>
+          <p class="note">Pauses or resumes everything, also while you're in game.</p>
+        </div>
+        <button id="hotkey" class="keycap" title="Click, then press the new hotkey"></button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Triggers</h2>
+        <div class="head-tools">
+          <button id="refresh" class="ghost icon" title="Refresh redeems from upmy.stream" aria-label="Refresh redeems">↻</button>
+          <button id="add">Add trigger</button>
+        </div>
+      </div>
+      <div id="triggers"></div>
+    </section>
+
+    <section class="card">
+      <h2>Log</h2>
+      <ol id="log" class="log"></ol>
+    </section>
+  </main>
+
+  <dialog id="editor">
+    <form method="dialog" id="editor-form">
+      <h2 id="editor-title">Add trigger</h2>
+
+      <div class="row">
+        <span class="label">When</span>
+        <div class="seg" data-name="source">
+          <button type="button" data-value="redeem">Redeem</button>
+          <button type="button" data-value="chat">Chat message</button>
+        </div>
+      </div>
+      <div class="row">
+        <select id="redeem" aria-label="Redeem"></select>
+        <input id="match" placeholder="w" autocomplete="off" spellcheck="false" aria-label="Chat message">
+        <p class="note" id="match-note"></p>
+      </div>
+
+      <div class="row">
+        <span class="label">Do</span>
+        <div class="seg" data-name="action">
+          <button type="button" data-value="key">Key</button>
+          <button type="button" data-value="mouse">Mouse button</button>
+          <button type="button" data-value="scroll">Scroll</button>
+          <button type="button" data-value="move">Mouse move</button>
+        </div>
+      </div>
+
+      <div class="pane" data-pane="key">
+        <div class="grid2">
+          <div><label>Keys</label><button type="button" id="capture" class="keycap wide">Click to set</button></div>
+          <div><label for="hold">Hold (ms)</label><input id="hold" type="number" min="1" max="10000"></div>
+        </div>
+      </div>
+      <div class="pane" data-pane="mouse">
+        <div class="grid2">
+          <div><label for="button">Button</label>
+            <select id="button"><option>Left</option><option>Right</option><option>Middle</option><option>Back</option><option>Forward</option></select></div>
+          <div><label for="hold-mouse">Hold (ms)</label><input id="hold-mouse" type="number" min="1" max="10000"></div>
+        </div>
+        <div class="checks"><span class="label">Hold while clicking</span>
+          <label><input type="checkbox" value="Ctrl"> Ctrl</label>
+          <label><input type="checkbox" value="Shift"> Shift</label>
+          <label><input type="checkbox" value="Alt"> Alt</label>
+        </div>
+      </div>
+      <div class="pane" data-pane="scroll">
+        <div class="grid2">
+          <div><label for="scroll-dir">Direction</label><select id="scroll-dir"><option value="1">Up</option><option value="-1">Down</option></select></div>
+          <div><label for="notches">Notches</label><input id="notches" type="number" min="1" max="20"></div>
+        </div>
+      </div>
+      <div class="pane" data-pane="move">
+        <div class="grid3">
+          <div><label for="dx">Right (px)</label><input id="dx" type="number" min="-5000" max="5000"></div>
+          <div><label for="dy">Down (px)</label><input id="dy" type="number" min="-5000" max="5000"></div>
+          <div><label for="move-ms">Over (ms)</label><input id="move-ms" type="number" min="0" max="5000"></div>
+        </div>
+        <p class="note">Use negative numbers to move left or up. The movement is smooth, so it works for turning the camera in games.</p>
+      </div>
+
+      <div class="row grid2">
+        <div><label for="cooldown">Cooldown (s)</label><input id="cooldown" type="number" min="0" max="3600"></div>
+      </div>
+
+      <p class="error" id="editor-error"></p>
+      <div class="actions">
+        <button type="button" id="try" class="ghost" title="Runs the action once after a 3 second countdown">Try it</button>
+        <div class="spacer"></div>
+        <button type="button" id="cancel" class="ghost">Cancel</button>
+        <button type="submit" id="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>

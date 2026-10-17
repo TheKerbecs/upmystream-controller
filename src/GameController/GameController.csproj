@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- .NET Framework 4.8 ships with Windows 10 and 11: one small exe, nothing to install.
+       Builds on any OS through the reference-assemblies package. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>10</LangVersion>
+    <AssemblyName>upmystream-game-controller</AssemblyName>
+    <RootNamespace>GameController</RootNamespace>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <Version>0.3.1</Version>
+    <Product>upmy.stream Game Controller</Product>
+    <Description>Turns upmy.stream redeems into key presses</Description>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../Core/*.cs" />
+    <EmbeddedResource Include="app.ico" LogicalName="app.ico" />
+    <EmbeddedResource Include="ui/**/*" LogicalName="ui/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="$(PkgMicrosoft_Web_WebView2)/lib/net462/Microsoft.Web.WebView2.Core.dll" LogicalName="wv2/Microsoft.Web.WebView2.Core.dll" />
+    <EmbeddedResource Include="$(PkgMicrosoft_Web_WebView2)/lib/net462/Microsoft.Web.WebView2.WinForms.dll" LogicalName="wv2/Microsoft.Web.WebView2.WinForms.dll" />
+    <EmbeddedResource Include="$(PkgMicrosoft_Web_WebView2)/runtimes/win-x64/native/WebView2Loader.dll" LogicalName="wv2/x64/WebView2Loader.dll" />
+    <EmbeddedResource Include="$(PkgMicrosoft_Web_WebView2)/runtimes/win-x86/native/WebView2Loader.dll" LogicalName="wv2/x86/WebView2Loader.dll" />
+    <EmbeddedResource Include="$(PkgMicrosoft_Web_WebView2)/runtimes/win-arm64/native/WebView2Loader.dll" LogicalName="wv2/arm64/WebView2Loader.dll" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <!-- Compile against WebView2 only; its DLLs ride inside the exe (Program.cs loads them). -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" GeneratePathProperty="true" IncludeAssets="compile" />
+  </ItemGroup>
+</Project>

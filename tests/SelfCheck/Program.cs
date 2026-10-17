@@ -272,6 +272,8 @@ static class Program
         using (var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(1500)))
             await rs2.Run(cts.Token);
         Check(st2.Contains("Reconnecting:no response for 45 s") && st2.Last() == "Stopped:", "silent stream times out; cancel stops");
+        Check(new RedeemStream("http://x", "k", false, _ => { }, (a, b) => { }).ConnectTimeout > TimeSpan.FromSeconds(15),
+            "waits longer for the first answer than the server's 15 s ping (quiet channel, stream offline)");
         silent.Stop();
         await hold;
     }

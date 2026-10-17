@@ -19,6 +19,9 @@ public sealed class RedeemStream
 
     // The server pings every 15 s; three missed pings means the connection is dead.
     public TimeSpan ReadTimeout = TimeSpan.FromSeconds(45);
+    // Longer than the 15 s ping: with nothing to send, the first bytes are a ping, and a proxy like Cloudflare may
+    // hold the headers back until then. A shorter wait never connects while the channel is quiet (stream offline).
+    public TimeSpan ConnectTimeout = TimeSpan.FromSeconds(40);
     public TimeSpan MaxBackoff = TimeSpan.FromSeconds(30);
     public TimeSpan RateLimitedWait = TimeSpan.FromMinutes(5);
 
@@ -112,7 +115,7 @@ public sealed class RedeemStream
         req.Headers.Accept.ParseAdd("text/event-stream");
         using (var connect = CancellationTokenSource.CreateLinkedTokenSource(ct))
         {
-            connect.CancelAfter(TimeSpan.FromSeconds(15));
+            connect.CancelAfter(ConnectTimeout);
             HttpResponseMessage resp;
             try
             {
@@ -120,7 +123,7 @@ public sealed class RedeemStream
             }
             catch (OperationCanceledException) when (!ct.IsCancellationRequested)
             {
-                throw new Exception("couldn't connect within 15 s");
+                throw new Exception($"couldn't connect within {ConnectTimeout.TotalSeconds:0} s");
             }
             using (resp)
             {
